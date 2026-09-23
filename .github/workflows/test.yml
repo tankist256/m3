@@ -12,6 +12,5 @@ jobs:
       - name: Show info
         run: |
           echo "Hello from self-hosted runner"
-          pwd
           ls -la
-          cat e
+          python3 main.py
