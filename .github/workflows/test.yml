@@ -1,18 +1,52 @@
-name: Test self-hosted
+name: CI/CD Pipeline (Git Flow)
 
 on:
   push:
     branches:
-      - beta
-  workflow_dispatch:
+      - '**'
 
 jobs:
+  # CI: Тесты запускаются для ВСЕХ веток
   test:
+    name: Run Tests (CI)
     runs-on: self-hosted
     steps:
-      - uses: actions/checkout@v4
-      - name: Show info
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Run test script
         run: |
-          echo "Hello from self-hosted runner"
-          git pull
+          echo "Starting tests for branch: ${GITHUB_REF_NAME}"
           python3 main.py
+
+  # CD: Деплой на тестовый сервер (при пуше/мердже в develop)
+  deploy_staging:
+    name: Deploy to Staging
+    runs-on: self-hosted
+    needs: test
+    if: github.ref == 'refs/heads/develop'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Fake Deploy to Staging
+        run: |
+          echo "Merging to DEVELOP detected!"
+          mkdir -p /tmp/staging_server/
+          cp main.py /tmp/staging_server/
+          echo "Deployed to Staging!"
+
+  # CD: Деплой на боевой сервер (при пуше/мердже в main)
+  deploy_production:
+    name: Deploy to Production
+    runs-on: self-hosted
+    needs: test
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Fake Deploy to Production
+        run: |
+          echo "Merging to MAIN detected!"
+          mkdir -p /tmp/production_server/
+          cp main.py /tmp/production_server/
+          echo "Deployed to Production!"
