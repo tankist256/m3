@@ -1,1 +1,2 @@
-print("hi!")print('This is a new feature')
+print('hi!')
+print('This is a new feature')
